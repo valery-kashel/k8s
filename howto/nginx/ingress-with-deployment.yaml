@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    app: nginx-v2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-v2
+  template:
+    metadata:
+      labels:
+        app: nginx-v2
+    spec:
+      containers:
+        - name: nginx-v2
+          image: nginx:1.23.1
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: new-nginx-service
+spec:
+  selector:
+    app: nginx-v2
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: new-nginx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: nginx.example.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/v2/*"
+            backend:
+              service:
+                name: new-nginx-service
+                port:
+                  number: 80
