@@ -1,0 +1,25 @@
+{{- range $service := .Values.services }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $service.name }}
+  labels:
+    app: {{ $service.name }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: {{ $service.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $service.name }}
+    spec:
+      containers:
+        - name: {{ $service.name }}
+          image: nginx:1.23.1
+          ports:
+            - containerPort: 80
+---
+{{- end}}
